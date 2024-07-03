@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using VirtualReception.Server.Hubs;
 using VirtualReception.Server.Infrastructure;
 using VitualReception.Domain.Model;

@@ -45,14 +45,23 @@ namespace VirtualReception.Client.Infrastructure
 
         public async Task<IEnumerable<Chat>> FindAllAsync()
         {
-            HttpResponseMessage response = await _client.GetAsync("chat");
+            HttpResponseMessage response = await _client.GetAsync($"chat/chats");
+            Console.WriteLine("!!! FindAllAsync");
+            Console.WriteLine(response);
             var content = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(content);
             if (!response.IsSuccessStatusCode)
             {
                 throw new ApplicationException(content);
             }
 
             var chats = JsonSerializer.Deserialize<IEnumerable<Chat>>(content, _options); // TODO -  this doesnt work
+
+            for (int i = 0; i < chats.Count(); i++)
+            {
+                Console.WriteLine(chats.ElementAt(i));
+            }
+
             return chats;
         }
 

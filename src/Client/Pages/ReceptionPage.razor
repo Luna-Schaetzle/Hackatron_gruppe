@@ -3,23 +3,27 @@
 
 @inject IChatRepository _chatRepository;
 
-<div>
-    @foreach(var chat in _chats)
-    {
-        <div class="row">
-            <div class="col col-md-auto">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@chat.Name</h5>
-                        @if (GetLastMessage(chat) != null)
-                        { <div class="last-message mb-2">@GetLastMessage(chat)</div> }
-                        <a href="@($"/chat/{chat.Id}/{MemberId}")" class="card-link">Öffnen</a>
+@if (_chats != null)
+{
+    <div>
+        @foreach(var chat in _chats)
+        {
+            <div class="row">
+                <div class="col col-md-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@chat.Name</h5>
+                            @if (GetLastMessage(chat) != null)
+                            { <div class="last-message mb-2">@GetLastMessage(chat)</div> }
+                            <a href="@($"/chat/{chat.Id}/{MemberId}")" class="card-link">Öffnen</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}
+
 
 @code {
     #region parameters

@@ -41,7 +41,7 @@ namespace VirtualReception.Server.Controllers
         }
 
         [HttpGet]
-        [Route("chat")]
+        [Route("chats")]
         public async Task<IActionResult> GetChats()
         {
             var chats = await _chatRepository.FindAllAsync();
