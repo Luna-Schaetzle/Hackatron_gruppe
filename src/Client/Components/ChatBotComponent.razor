@@ -1,0 +1,58 @@
+@page "/chatbot"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<h3>Chatbot</h3>
+
+<div>
+    <input @bind="userMessage" placeholder="Schreibe eine Nachricht..." />
+    <button @onclick="SendMessage">Senden</button>
+</div>
+
+<div>
+    @foreach (var message in messages)
+    {
+        <p><strong>@message.Sender:</strong> @message.Content</p>
+    }
+</div>
+
+@code {
+    private string userMessage;
+    private List<ChatMessage> messages = new List<ChatMessage>();
+    private string errorMessage;
+
+    private async Task SendMessage()
+    {
+        try
+        {
+            var userChatMessage = new ChatMessage { Sender = "User", Content = userMessage };
+            messages.Add(userChatMessage);
+
+            var response = await Http.PostAsJsonAsync("api/chatbot", userChatMessage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var botResponse = await response.Content.ReadFromJsonAsync<ChatMessage>();
+                messages.Add(botResponse);
+            }
+            else
+            {
+                errorMessage = $"Server returned error: {response.StatusCode}";
+            }
+
+            userMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    public class ChatMessage
+    {
+        public string Sender { get; set; }
+        public string Content { get; set; }
+    }
+}
