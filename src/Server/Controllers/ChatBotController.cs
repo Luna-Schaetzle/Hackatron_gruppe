@@ -1,26 +1,32 @@
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 
-[Route("api/[controller]")]
-[ApiController]
-public class ChatBotController : ControllerBase
+
+
+namespace VirtualReception.Server.Controllers
 {
-    [HttpPost]
-    public IActionResult GetResponse([FromBody] ChatMessage message)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ChatBotController : ControllerBase
     {
-        if (message == null || string.IsNullOrEmpty(message.Content))
+        [HttpPost]
+        public IActionResult GetResponse([FromBody] ChatMessage message)
         {
-            return BadRequest("Message content cannot be null or empty.");
+            if (message == null || string.IsNullOrEmpty(message.Content))
+            {
+                return BadRequest("Message content cannot be null or empty.");
+            }
+
+            // Einfache Logik für den Chatbot
+            string botResponse = "Ich bin ein einfacher Chatbot. Du hast gesagt: " + message.Content;
+
+            return Ok(new ChatMessage { Sender = "Chatbot", Content = botResponse });
         }
-
-        // Einfache Logik für den Chatbot
-        string botResponse = "Ich bin ein einfacher Chatbot. Du hast gesagt: " + message.Content;
-
-        return Ok(new ChatMessage { Sender = "Chatbot", Content = botResponse });
     }
-}
 
-public class ChatMessage
-{
-    public string Sender { get; set; }
-    public string Content { get; set; }
+    public class ChatMessage
+    {
+        public string Sender { get; set; }
+        public string Content { get; set; }
+    }
 }

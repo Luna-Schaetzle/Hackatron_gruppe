@@ -33,4 +33,7 @@ namespace VirtualReception.Server.Controllers
             return Ok(await _chatRepository.FindAllAsync());
         }
     }
+
+
+    
 }
