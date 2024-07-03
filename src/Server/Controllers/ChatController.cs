@@ -1,4 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Reflection.Metadata;
+using System.Text.Json;
 using System.Threading.Tasks;
 using VitualReception.Domain.Model;
 
@@ -27,10 +31,65 @@ namespace VirtualReception.Server.Controllers
 
         #endregion
 
+        [HttpPost]
+        [Route("chat")]
+        public async Task<IActionResult> PostChat(string chatString)
+        {
+            var chat = JsonSerializer.Deserialize<Chat>(chatString);
+            await _chatRepository.AddAsync(chat);
+            return Ok();
+        }
+
         [HttpGet]
+        [Route("chat")]
         public async Task<IActionResult> GetChats()
         {
-            return Ok(await _chatRepository.FindAllAsync());
+            var chats = await _chatRepository.FindAllAsync();
+            var chatsString = JsonSerializer.Serialize<IEnumerable<Chat>>(chats);
+            var result = Ok(chatsString);
+            //result.ContentTypes.Add("application/json");
+
+            //return Ok(chats);
+            return result;
         }
+
+        [HttpGet("{id}")]
+        [Route("chat/{id}")]
+        public async Task<IActionResult> GetChat(Guid id)
+        {
+            var chat = await _chatRepository.FindAsync(id);
+            var chatString = JsonSerializer.Serialize<Chat>(chat);
+
+            //Console.WriteLine("chat");
+            //Console.WriteLine(chat);
+            //var chat2 = JsonSerializer.Deserialize<Chat>(chatString);
+            //Console.WriteLine("chat2");
+            //Console.WriteLine(chat2);
+
+            var result = Ok(chatString);
+            //result.ContentTypes.Add("application/json");
+
+            //return Ok(chat);
+            return result;
+        }
+
+        [HttpDelete("{id}")]
+        [Route("chat/{id}")]
+        public async Task<IActionResult> RemoveChat(Guid id)
+        {
+            var chat = await _chatRepository.FindAsync(id);
+            await _chatRepository.RemoveAsync(chat);
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("chat")]
+        public async Task<IActionResult> UpdateChat(string chatString)
+        {
+            var chat = JsonSerializer.Deserialize<Chat>(chatString);
+            await _chatRepository.UpdateAsync(chat);
+            return Ok();
+        }
+
     }
 }

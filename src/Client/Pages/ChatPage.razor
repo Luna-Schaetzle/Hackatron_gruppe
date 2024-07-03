@@ -3,7 +3,7 @@
 
 @inject IChatRepository _chatRepository;
 
-<ChatComponent MemberId="@MemberId" Chat="_chat" />
+<ChatComponent MemberId="@MemberId" ChatId="@ChatId" />
 
 @code {
     #region parameters
@@ -15,13 +15,4 @@
     public string MemberId { get; set; }
 
     #endregion
-
-    #region fields
-
-    private Chat _chat;
-
-    #endregion
-
-    protected override async Task OnInitializedAsync()
-    { _chat = await _chatRepository.FindAsync(Guid.Parse(ChatId)); }
 }

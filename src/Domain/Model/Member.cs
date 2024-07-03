@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace VitualReception.Domain.Model
 {
@@ -21,12 +22,19 @@ namespace VitualReception.Domain.Model
         /// <summary>
         /// The unqiue identifier.
         /// </summary>
+        [JsonPropertyName("id")]
         public Guid Id { get; }
 
         /// <summary>
         /// The name.
         /// </summary>
+        [JsonPropertyName("name")]
         public string Name { get; }
+
+        override public string ToString()
+        {
+            return $"Member: {Id} - {Name}";
+        }
 
         #region equals & hashcode
 

@@ -1,28 +1,9 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client;
 @using VitualReception.Domain.Model;
 
+@inject IChatRepository _chatRepository;
+
 <PageTitle>Index</PageTitle>
-
-<div class="container-fluid d-flex flex-column h-100">
-    <div class="row mt-2">
-        <h4>@Chat.Name</h4>
-    </div>
-    @foreach(var message in _messages)
-    {
-
-        <div class="row mt-2 @(message.CreatedByMember == Guid.Parse(MemberId) ? "justify-content-end" : "justify-content-start" )">
-            <div class="w-auto px-4 py-2 @(message.CreatedByMember == Guid.Parse(MemberId) ? "bg-secondary" : "bg-info" )" style="color: white; border: 1px solid @(message.CreatedByMember == Guid.Parse(MemberId) ? "#f8f9fa" : "#0dcaf0" ); border-radius: 15px">@message.Content</div>
-        </div>
-    }
-    <div class="row mt-auto">
-        <div class="col-12">
-            <div class="input-group mb-3">
-                <input @bind="_messageContent" type="text" class="form-control" placeholder="Nachricht" aria-describedby="chat-send-button">
-                <button @onclick="Send" class="btn btn-outline-secondary @(!IsConnected ? "disabled" : null)" type="button" id="chat-send-button">Senden</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @code {
 
@@ -32,7 +13,10 @@
     public string MemberId { get; set; }
 
     [Parameter]
-    public Chat Chat { get; set; }
+    public string ChatId { get; set; }
+
+
+    private Chat _chat { get; set; }
 
     #endregion
 
@@ -46,8 +30,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _chat = await _chatRepository.FindAsync(Guid.Parse(ChatId));
+
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl($"http://localhost:5000/hubs/chat?chatId={Chat.Id}&memberId={MemberId}")
+            .WithUrl($"http://localhost:5000/hubs/chat?chatId={_chat.Id}&memberId={MemberId}")
             .WithAutomaticReconnect()
             .Build();
 
@@ -57,9 +43,9 @@
             InvokeAsync(StateHasChanged);
         });
 
-        if (Chat.Messages != null)
+        if (_chat.Messages != null)
         {
-            foreach (var message in Chat.Messages.OrderBy(message => message.CreatedDateTime))
+            foreach (var message in _chat.Messages.OrderBy(message => message.CreatedDateTime))
             { _messages.Add(message); }
         }
 
@@ -69,12 +55,12 @@
     // Send the message over SignalR
     private async Task Send()
     {
-        var message = Chat.CreateMessage(Guid.Parse(MemberId), _messageContent);
+        var message = _chat.CreateMessage(Guid.Parse(MemberId), _messageContent);
 
         _messageContent = string.Empty;
 
         if (_hubConnection is not null)
-        { await _hubConnection.SendAsync("WriteMessage", Chat.Id, message); }
+        { await _hubConnection.SendAsync("WriteMessage", _chat.Id, message); }
     }
 
     public bool IsConnected => _hubConnection.State == HubConnectionState.Connected;
@@ -88,3 +74,28 @@
         }
     }
 }
+
+@if (_chat is not null)
+{
+    <div class="container-fluid d-flex flex-column h-100">
+        <div class="row mt-2">
+            <h4>@_chat.Name</h4>
+        </div>
+        @foreach(var message in _messages)
+        {
+
+            <div class="row mt-2 @(message.CreatedByMember == Guid.Parse(MemberId) ? "justify-content-end" : "justify-content-start" )">
+                <div class="w-auto px-4 py-2 @(message.CreatedByMember == Guid.Parse(MemberId) ? "bg-secondary" : "bg-info" )" style="color: white; border: 1px solid @(message.CreatedByMember == Guid.Parse(MemberId) ? "#f8f9fa" : "#0dcaf0" ); border-radius: 15px">@message.Content</div>
+            </div>
+        }
+        <div class="row mt-auto">
+            <div class="col-12">
+                <div class="input-group mb-3">
+                    <input @bind="_messageContent" type="text" class="form-control" placeholder="Nachricht" aria-describedby="chat-send-button">
+                    <button @onclick="Send" class="btn btn-outline-secondary @(!IsConnected ? "disabled" : null)" type="button" id="chat-send-button">Senden</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

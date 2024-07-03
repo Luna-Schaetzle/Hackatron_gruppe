@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json.Serialization;
+using System.Xml.Linq;
 
 namespace VitualReception.Domain.Model
 {
@@ -21,25 +23,43 @@ namespace VitualReception.Domain.Model
             CreatedByMember = createdByMember;
         }
 
+        [JsonConstructor]
+        public Message(Guid id, string content, DateTime createdDateTime, Guid createdByMember)
+        {
+            Id = id;
+            Content = content;
+            CreatedDateTime = createdDateTime;
+            CreatedByMember = createdByMember;
+        }
+
         /// <summary>
         /// The unique identifier.
         /// </summary>
+        [JsonPropertyName("id")]
         public Guid Id { get; }
 
         /// <summary>
         /// The content.
         /// </summary>
+        [JsonPropertyName("content")]
         public string Content { get; }
 
         /// <summary>
         /// The timestamp when this <see cref="Message"/> instance was created.
         /// </summary>
+        [JsonPropertyName("createdDateTime")]
         public DateTime CreatedDateTime { get; }
 
         /// <summary>
         /// The identity which created this <see cref="Message"/> instance.
         /// </summary>
+        [JsonPropertyName("createdByMember")]
         public Guid CreatedByMember { get; }
+
+        override public string ToString()
+        {
+            return $"Member: {Id} - {Content} - {CreatedDateTime} - {CreatedByMember}";
+        }
 
         #region equals & hash
 

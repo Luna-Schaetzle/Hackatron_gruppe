@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace VitualReception.Domain.Model
 {
@@ -25,26 +28,39 @@ namespace VitualReception.Domain.Model
             Members = new();
         }
 
+        [JsonConstructor]
+        public Chat(Guid id, string name, List<Message> messages, HashSet<Member> members)
+        {
+            Id = id;
+            Name = name;
+            Messages = messages;
+            Members = members;
+        }
+
         #endregion
 
         /// <summary>
         /// The unique identifier.
         /// </summary>
+        [JsonPropertyName("id")]
         public Guid Id { get; }
 
         /// <summary>
         /// The name.
         /// </summary>
+        [JsonPropertyName("name")]
         public string Name { get; }
 
         /// <summary>
         /// A collection of <see cref="Message"/> instances.
         /// </summary>
+        [JsonPropertyName("messages")]
         public List<Message> Messages { get; init; }
 
         /// <summary>
         /// A collection of <see cref="Member"/> instances.
         /// </summary>
+        [JsonPropertyName("members")]
         public HashSet<Member> Members { get; init; }
 
         /// <summary>
@@ -64,6 +80,14 @@ namespace VitualReception.Domain.Model
             Messages.Add(message);
 
             return message;
+        }
+
+        public override string ToString()
+        {
+            string msgs = string.Join(",", Messages.Select(x => x.ToString()).ToArray());
+            string mbrs = string.Join(",", Members.Select(x => x.ToString()).ToArray());
+            return $"Chat: {Id} - {Name} - {msgs} - {mbrs}";
+            //return JsonSerializer.Serialize<Chat>(this);
         }
 
         #region equals & hashcode

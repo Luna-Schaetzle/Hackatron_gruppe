@@ -43,5 +43,7 @@ namespace VitualReception.Domain.Model
         /// <param name="chat">The <see cref="Chat"/> instance to remove.</param>
         /// <returns></returns>
         Task RemoveAsync(Chat chat);
+
+        Task UpdateAsync(Chat chat);
     }
 }
