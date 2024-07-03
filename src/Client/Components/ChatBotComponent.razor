@@ -1,22 +1,132 @@
 @page "/chatbot"
 
-<h3>Chatbot</h3>
+<style>
+    /* Stilisierung für das Chatfenster */
+    .chat-container {
+        max-height: 400px; /* Begrenzt die Höhe des Chatfensters */
+        overflow-y: auto; /* Scrollen bei Bedarf */
+        padding: 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
 
-<div class="chat-container">
+    .message-container {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    .user-message-container {
+        justify-content: flex-start; /* Eigene Nachrichten links ausrichten */
+    }
+
+    .bot-message-container {
+        justify-content: flex-end; /* Chatbot-Nachrichten rechts ausrichten */
+    }
+
+    .message {
+        padding: 8px 12px;
+        max-width: 70%;
+        word-wrap: break-word;
+        border-radius: 8px;
+    }
+
+    .user-message {
+        background-color: #2196F3;
+        color: white;
+    }
+
+    .bot-message {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .input-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .input-container input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .input-container button {
+        margin-left: 10px;
+        padding: 8px 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .suggestions {
+        margin-top: 10px;
+    }
+
+    .suggestions button {
+        margin-right: 10px;
+        padding: 8px 16px;
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .bot-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+</style>
+
+<h3>Hotel Chatbot</h3>
+
+<div class="chat-container" @ref="chatContainer">
     @foreach (var message in messages)
     {
-        <div class="message @(message.IsBotMessage ? "bot-message" : "user-message")">
-            @message.Text
+        <div class="message-container @(message.IsBotMessage ? "bot-message-container" : "user-message-container")">
+            @if (message.IsBotMessage)
+            {
+                <img src="https://static.vecteezy.com/ti/gratis-vektor/p3/10054157-chat-bot-roboter-avatar-im-kreis-runde-form-isoliert-auf-weissem-hintergrund-stock-illustration-ai-technologie-futuristisch-helfer-kommunikation-konversationskonzept-im-flachen-stil-vektor.jpg" alt="Chatbot Avatar" class="bot-avatar" />
+            }
+            @if (!message.IsBotMessage)
+            {
+                <img src="https://www.pngkey.com/png/full/114-1149878_avatar-people-circle-user-profile-human-happy.png" alt="User Avatar" class="bot-avatar" />
+            }
+            <div class="message @(message.IsBotMessage ? "bot-message" : "user-message")">
+                @message.Text
+            </div>
         </div>
     }
+    <div style="float: left; clear: both;"></div> <!-- Clearfix to ensure chat container expands correctly -->
 </div>
 
-<input type="text" @bind-value="userInput" @bind-value:event="oninput" @onkeypress="HandleKeyPress" placeholder="Type your message..." />
-<button @onclick="SendMessage">Send</button>
+<div class="input-container">
+    <input type="text" @bind-value="userInput" @bind-value:event="oninput" @onkeypress="HandleKeyPress" placeholder="Type your message..." />
+    <button @onclick="SendMessage">Send</button>
+</div>
+
+<div class="suggestions">
+    <p>Vorschläge: <button @onclick="SuggestGreetings">Hallo</button> <button @onclick="SuggestBooking">Zimmer buchen</button> 
+    <button @onclick="SuggestRestaurant">Restaurant</button> <button @onclick="SuggestLocation">Standort</button>
+    <button @onclick="SuggestCheckIn">Check-in</button> <button @onclick="SuggestAusstattung">Ausstattung</button>
+    </p>
+</div>
 
 @code {
     private string userInput = "";
     private List<Message> messages = new List<Message>();
+    private ElementReference chatContainer;
+
+    [Inject]
+    private IJSRuntime jsRuntime { get; set; }
 
     private void SendMessage()
     {
@@ -25,28 +135,59 @@
             messages.Add(new Message(userInput, false));
             ReplyToUser(userInput);
             userInput = "";
+            ScrollToBottom();
         }
     }
 
-    private void ReplyToUser(string message)
+   private void ReplyToUser(string message)
+{
+    string reply;
+
+    if (message.ToLower().Contains("hallo") || message.ToLower().Contains("hi"))
     {
-        // Simple logic to generate bot responses based on user input
-        string reply;
-        if (message.ToLower().Contains("hallo"))
-        {
-            reply = "Hallo! Wie kann ich Ihnen helfen?";
-        }
-        else if (message.ToLower().Contains("zimmer buchen"))
-        {
-            reply = "Sicher! Möchten Sie ein Einzelzimmer oder Doppelzimmer buchen?";
-        }
-        else
-        {
-            reply = "Entschuldigung, ich habe Sie nicht verstanden.";
-        }
-        
-        messages.Add(new Message(reply, true));
+        reply = "Hallo! Willkommen im Hotel. Wie kann ich Ihnen helfen?";
     }
+    else if (message.ToLower().Contains("zimmer buchen"))
+    {
+        reply = "Sicher! Möchten Sie ein Einzelzimmer oder Doppelzimmer buchen?";
+    }
+    else if (message.ToLower().Contains("einzelzimmer"))
+    {
+        reply = "Einzelzimmer sind verfügbar. Möchten Sie spezifische Termine oder besondere Anforderungen angeben?";
+    }
+    else if (message.ToLower().Contains("doppelzimmer"))
+    {
+        reply = "Doppelzimmer sind verfügbar. Möchten Sie spezifische Termine oder besondere Anforderungen angeben?";
+    }
+    else if (message.ToLower().Contains("restaurant") || message.ToLower().Contains("essen"))
+    {
+        reply = "Unser Hotelrestaurant bietet eine Vielzahl von Speisen an. Möchten Sie einen Tisch reservieren?";
+    }
+    else if (message.ToLower().Contains("ausstattung") || message.ToLower().Contains("pool") || message.ToLower().Contains("fitness"))
+    {
+        reply = "Unser Hotel verfügt über einen Pool, ein Fitnessstudio und weitere Annehmlichkeiten. Möchten Sie mehr darüber erfahren?";
+    }
+    else if (message.ToLower().Contains("standort") || message.ToLower().Contains("adresse"))
+    {
+        reply = "Unser Hotel befindet sich in der Innenstadt. Möchten Sie Anweisungen oder eine Karte?";
+    }
+    else if (message.ToLower().Contains("check-in") || message.ToLower().Contains("check-out"))
+    {
+        reply = "Der Check-in ist ab 14:00 Uhr möglich und der Check-out bis 11:00 Uhr. Haben Sie weitere Fragen zu unseren Check-in- oder Check-out-Prozessen?";
+    }
+    else if (message.ToLower().Contains("buchung ändern") || message.ToLower().Contains("stornierung"))
+    {
+        reply = "Für Buchungsänderungen oder Stornierungen kontaktieren Sie bitte unsere Rezeption unter der Telefonnummer XXX-XXX-XXXX.";
+    }
+    else
+    {
+        reply = "Entschuldigung, ich habe Sie nicht verstanden. Wie kann ich Ihnen weiterhelfen?";
+    }
+
+    messages.Add(new Message(reply, true));
+    ScrollToBottom();
+}
+
 
     private void HandleKeyPress(KeyboardEventArgs e)
     {
@@ -54,6 +195,48 @@
         {
             SendMessage();
         }
+    }
+
+    private async Task ScrollToBottom()
+    {
+        await Task.Delay(100); // Wait for messages to render
+        await jsRuntime.InvokeVoidAsync("BlazorChat.scrollToBottom", chatContainer);
+    }
+
+    private void SuggestGreetings()
+    {
+        userInput = "Hallo";
+        SendMessage();
+    }
+
+    private void SuggestBooking()
+    {
+        userInput = "Zimmer buchen";
+        SendMessage();
+    }
+
+    private void SuggestRestaurant()
+    {
+        userInput = "Restaurant";
+        SendMessage();
+    }
+
+    private void SuggestLocation()
+    {
+        userInput = "Standort";
+        SendMessage();
+    }
+
+    private void SuggestCheckIn()
+    {
+        userInput = "Check-in";
+        SendMessage();
+    }
+
+    private void SuggestAusstattung()
+    {
+        userInput = "Ausstattung";
+        SendMessage();
     }
 
     public class Message
