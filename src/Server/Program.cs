@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting; // Hinzugefügt
 using VirtualReception.Server.Hubs;
 using VirtualReception.Server.Infrastructure;
 using VitualReception.Domain.Model;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +23,7 @@ builder.Services.AddCors(opt => opt.AddDefaultPolicy(builder =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) // Korrektur
+if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
